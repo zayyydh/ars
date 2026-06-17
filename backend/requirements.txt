@@ -1,0 +1,36 @@
+# Parsing
+pymupdf>=1.23.0
+pdfplumber>=0.10.0
+python-docx>=1.1.0
+pytesseract>=0.3.10
+Pillow>=10.0.0
+
+# NLP / ML
+spacy>=3.7.0
+transformers>=4.35.0
+sentence-transformers>=2.2.2
+
+# LLM / LangChain
+langchain>=0.1.0
+langchain-core>=0.1.0
+langchain-openai>=0.0.5
+langchain-google-genai>=0.0.6
+openai>=1.6.0
+pydantic>=2.5.0
+
+# Flask API
+flask>=3.0.0
+flask-sqlalchemy>=3.1.0
+flask-cors>=4.0.0
+gunicorn>=21.2.0
+
+# Database
+psycopg2-binary>=2.9.9
+SQLAlchemy>=2.0.0
+
+# Async / Queue
+celery>=5.3.0
+redis>=5.0.0
+
+# Utilities
+python-dotenv>=1.0.0
