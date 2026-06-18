@@ -39,10 +39,12 @@ def create_app(config_override=None):
     from .routes.jobs import jobs_bp
     from .routes.resumes import resumes_bp
     from .routes.results import results_bp
+    from .routes.screen import screen_bp
 
     app.register_blueprint(jobs_bp,    url_prefix="/api")
     app.register_blueprint(resumes_bp, url_prefix="/api")
     app.register_blueprint(results_bp, url_prefix="/api")
+    app.register_blueprint(screen_bp,  url_prefix="/api")
 
     @app.errorhandler(400)
     def bad_request(e):
