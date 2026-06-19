@@ -23,6 +23,10 @@ _DEGREE_PATTERNS = {
 }
 
 _COMMON_SKILLS = [
+    "tableau", "power bi", "excel", "r", "sql", "etl",
+"data warehousing", "statistics", "analytical", 
+"machine learning", "predictive analytics",
+"business intelligence", "data analysis",
     "python", "java", "javascript", "typescript", "go", "rust", "c++", "c#",
     "react", "angular", "vue", "node.js", "django", "flask", "fastapi", "spring",
     "postgresql", "mysql", "mongodb", "redis", "sqlite", "elasticsearch",

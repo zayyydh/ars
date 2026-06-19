@@ -41,6 +41,20 @@ logger = logging.getLogger(__name__)
 # to their canonical form, then compare canonical names.
 
 SKILL_ALIASES: dict[str, str] = {
+    "r":          "r",
+"tableau":    "tableau",
+"power bi":   "power bi",
+"powerbi":    "power bi",
+"excel":      "excel",
+"sql":        "sql",
+"mysql":      "sql",
+"postgresql": "sql",
+"etl":        "etl",
+"data warehousing": "data warehousing",
+"machine learning": "machine learning",
+"ml":         "machine learning",
+"statistics": "statistics",
+"statistical": "statistics",
     # JavaScript ecosystem
     "reactjs": "react", "react.js": "react",
     "vuejs": "vue", "vue.js": "vue",
@@ -264,15 +278,9 @@ def score(
 # ──────────────────────────────────────────────────────────────────
 
 def _normalise(skill: str) -> str:
-    """
-    Normalise a skill string to its canonical form for comparison.
-    Applies alias lookup, lowercases, strips punctuation.
-    """
-    cleaned = skill.lower().strip()
-    cleaned = re.sub(r"[^\w\s\+\#\.]", "", cleaned)  # keep +, #, . (C++, C#, .NET)
-    cleaned = re.sub(r"\s+", " ", cleaned)
+    cleaned = re.sub(r"[^\w\s\+\#\.]", "", skill.lower().strip())
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
     return SKILL_ALIASES.get(cleaned, cleaned)
-
 
 def _find_match(jd_skill_norm: str, cand_map: dict[str, str]) -> str | None:
     """
