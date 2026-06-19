@@ -199,7 +199,7 @@ export default function ResumeScreener() {
       const fd = new FormData();
       fd.append("resume", file);
       fd.append("job_description", jd);
-      const res = await fetch("http://localhost:5000/api/screen", { method: "POST", body: fd });
+      const res = await fetch("https://ars-4wre.onrender.com/api/screen", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Server error");
       setResult(data);
