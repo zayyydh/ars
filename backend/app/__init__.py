@@ -1,7 +1,7 @@
 import sys
 import os
 import logging
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 _BACKEND = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,26 +23,22 @@ def create_app(config_override=None):
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
 
-    CORS(app,
-         origins=["https://ars-ecru.vercel.app",
-                  "http://localhost:5173",
-                  "http://localhost:3000"],
-         supports_credentials=True,
-         allow_headers=["Content-Type", "Authorization"],
-         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
-
-    @app.after_request
-    def after_request(response):
-        origin = response.headers.get("Origin", "")
-        allowed = ["https://ars-ecru.vercel.app",
-                   "http://localhost:5173",
-                   "http://localhost:3000"]
-        if origin in allowed:
-            response.headers["Access-Control-Allow-Origin"]  = origin
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
-        response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        return response
+    # ==================== CORS CONFIGURATION ====================
+    # This is the only CORS configuration needed - clean and working
+    CORS(
+        app,
+        origins=[
+            "https://ars-ecru.vercel.app",
+            "http://localhost:5173",
+            "http://localhost:3000"
+        ],
+        supports_credentials=True,
+        allow_headers=["Content-Type", "Authorization", "Accept"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        expose_headers=["Content-Type", "Authorization"],
+        max_age=3600  # Cache preflight for 1 hour
+    )
+    # ============================================================
 
     db.init_app(app)
     with app.app_context():
@@ -64,6 +60,7 @@ def create_app(config_override=None):
     app.register_blueprint(results_bp, url_prefix="/api")
     app.register_blueprint(screen_bp,  url_prefix="/api")
 
+    # ==================== ERROR HANDLERS ====================
     @app.errorhandler(400)
     def bad_request(e):
         return jsonify({"error": "Bad request", "detail": str(e)}), 400
@@ -84,6 +81,16 @@ def create_app(config_override=None):
     @app.get("/health")
     def health():
         return jsonify({"status": "ok"}), 200
+
+    # ==================== CORS TEST ENDPOINT ====================
+    @app.route("/api/test-cors", methods=["GET", "OPTIONS"])
+    def test_cors():
+        """Test endpoint to verify CORS is working"""
+        return jsonify({
+            "status": "CORS working!",
+            "origin": request.headers.get("Origin"),
+            "method": request.method
+        }), 200
 
     app.logger.info(f"App ready - debug={app.config.get('DEBUG')}")
     return app
