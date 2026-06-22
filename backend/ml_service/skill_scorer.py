@@ -124,29 +124,13 @@ SEMANTIC_GROUPS: list[set[str]] = [
 
 _embed_model = None
 
+import os
+
 def _get_embeddings():
-    """
-    Load sentence-transformers model for semantic similarity.
-    Model: all-MiniLM-L6-v2 — 90MB, fast, good at short phrase similarity.
-    Only loaded once per process, cached in _embed_model.
-    Falls back gracefully if not installed.
-    """
-    global _embed_model
-    if _embed_model is not None:
-        return _embed_model
-    try:
-        from sentence_transformers import SentenceTransformer
-        _embed_model = SentenceTransformer("all-MiniLM-L6-v2")
-        logger.info("skill_scorer: loaded sentence-transformers model")
-        return _embed_model
-    except ImportError:
-        logger.info(
-            "skill_scorer: sentence-transformers not installed — "
-            "using alias matching only. Install with: pip install sentence-transformers"
-        )
+    # Skip on free hosting — too memory heavy
+    if os.getenv("DISABLE_EMBEDDINGS", "false").lower() == "true":
         return None
-
-
+    # ... rest of existing code
 # ──────────────────────────────────────────────────────────────────
 # Public function
 # ──────────────────────────────────────────────────────────────────
