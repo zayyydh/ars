@@ -127,8 +127,16 @@ _embed_model = None
 import os
 
 def _get_embeddings():
-    # Skip on free hosting — too memory heavy
+    global _embed_model
+    if _embed_model is not None:
+        return _embed_model
     if os.getenv("DISABLE_EMBEDDINGS", "false").lower() == "true":
+        return None
+    try:
+        from sentence_transformers import SentenceTransformer
+        _embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+        return _embed_model
+    except ImportError:
         return None
     # ... rest of existing code
 # ──────────────────────────────────────────────────────────────────

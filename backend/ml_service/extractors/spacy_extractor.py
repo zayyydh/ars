@@ -35,21 +35,23 @@ logger = logging.getLogger(__name__)
 # that imports from the extractors package.
 _nlp = None
 
-def _get_nlp():
-    """Load spaCy model once and cache it in the module-level _nlp variable."""
-    global _nlp
-    if _nlp is None:
-        try:
-            import spacy
-            _nlp = spacy.load("en_core_web_sm")
-            logger.info("spacy_extractor: loaded en_core_web_sm")
-        except OSError:
-            logger.error(
-                "spaCy model not found. Run: python -m spacy download en_core_web_sm"
-            )
-            raise
-    return _nlp
+import os  
 
+def _get_nlp():
+    global _nlp
+    if _nlp is not None:
+        return _nlp
+    if os.getenv("DISABLE_SPACY", "false").lower() == "true":
+        logger.info("spacy_extractor: disabled via env var")
+        return None
+    try:
+        import spacy
+        _nlp = spacy.load("en_core_web_sm")
+        logger.info("spacy_extractor: loaded en_core_web_sm")
+        return _nlp
+    except Exception as e:
+        logger.warning(f"spacy_extractor: could not load model — {e}")
+        return None
 
 # ──────────────────────────────────────────────────────────────────
 # Degree level normalisation
@@ -145,11 +147,9 @@ def extract(text: str) -> dict:
     result: dict = {}
     warnings: list[str] = []
 
-    try:
-        nlp = _get_nlp()
-    except Exception as e:
-        return {"_warnings": [f"spaCy unavailable: {e}"]}
-
+   nlp = _get_nlp()
+if nlp is None:
+    return {"_warnings": ["spaCy disabled"], "date_ranges": [], "total_exp_years": 0}
     # spaCy processes up to 1MB of text. For very long resumes, truncate.
     # Resumes are rarely more than 5000 words — this limit is a safety net.
     MAX_CHARS = 50_000
