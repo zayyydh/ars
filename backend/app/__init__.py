@@ -1,7 +1,7 @@
 import sys
 import os
 import logging
-from flask import Flask, app, jsonify
+from flask import Flask, jsonify
 from flask_cors import CORS
 
 _BACKEND = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,20 +23,26 @@ def create_app(config_override=None):
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
 
-    CORS(app, 
-     origins=["https://ars-ecru.vercel.app", 
-                  "http://localhost:5173", 
-               "http://localhost:3000"],
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
-    
-@app.after_request
-def after_request(response):
-    response.headers.add("Access-Control-Allow-Origin", "https://ars-ecru.vercel.app")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
-    return response
+    CORS(app,
+         origins=["https://ars-ecru.vercel.app",
+                  "http://localhost:5173",
+                  "http://localhost:3000"],
+         supports_credentials=True,
+         allow_headers=["Content-Type", "Authorization"],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+
+    @app.after_request
+    def after_request(response):
+        origin = response.headers.get("Origin", "")
+        allowed = ["https://ars-ecru.vercel.app",
+                   "http://localhost:5173",
+                   "http://localhost:3000"]
+        if origin in allowed:
+            response.headers["Access-Control-Allow-Origin"]  = origin
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        return response
 
     db.init_app(app)
     with app.app_context():
@@ -48,10 +54,10 @@ def after_request(response):
 
     os.makedirs(app.config.get("UPLOAD_FOLDER", "/tmp/resume_uploads"), exist_ok=True)
 
-    from .routes.jobs import jobs_bp
+    from .routes.jobs    import jobs_bp
     from .routes.resumes import resumes_bp
     from .routes.results import results_bp
-    from .routes.screen import screen_bp
+    from .routes.screen  import screen_bp
 
     app.register_blueprint(jobs_bp,    url_prefix="/api")
     app.register_blueprint(resumes_bp, url_prefix="/api")
@@ -79,7 +85,7 @@ def after_request(response):
     def health():
         return jsonify({"status": "ok"}), 200
 
-    app.logger.info(f"App ready — debug={app.config.get('DEBUG')}")
+    app.logger.info(f"App ready - debug={app.config.get('DEBUG')}")
     return app
 
 
@@ -95,7 +101,7 @@ def _init_redis(app):
         ext.redis_client = client
         app.logger.info("Redis connected")
     except Exception as e:
-        app.logger.warning(f"Redis not available ({e}) — caching disabled")
+        app.logger.warning(f"Redis not available ({e}) - caching disabled")
         ext.redis_client = None
 
 
